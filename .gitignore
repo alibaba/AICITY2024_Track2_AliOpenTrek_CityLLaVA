@@ -1,0 +1,12 @@
+__pycache__
+*.so
+build
+.coverage_*
+*.egg-info
+*~
+.vscode/
+.idea/
+
+image/.DS_Store
+llava/model/.DS_Store
+.DS_Store
