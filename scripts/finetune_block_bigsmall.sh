@@ -1,0 +1,35 @@
+#!/bin/bash
+
+deepspeed --include localhost:0,1,2,3,4,5,6,7 llava/train/train_mem_block.py \
+    --deepspeed ./scripts/zero3.json \
+    --zero_stage 3 \
+    --model_name_or_path ./models/llava-v1.6-34b-12block \
+    --version chatml_direct \
+    --data_path './data_preprocess/processed_anno/llava_format/wts_bdd_llava_qa_train_stage_filted_checked.json' \
+    --image_folder ./data_preprocess/data \
+    --mm_vision_select_layer -2 \
+    --mm_use_im_start_end False \
+    --mm_use_im_patch_token False \
+    --image_aspect_ratio bigsmall \
+    --mm_patch_merge_type flat \
+    --group_by_modality_length True \
+    --bf16 True \
+    --output_dir ./checkpoints/llava1_6-34b-aicity-block-bigsmall \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 4 \
+    --per_device_eval_batch_size 4 \
+    --gradient_accumulation_steps 2 \
+    --evaluation_strategy "no" \
+    --save_strategy "epoch" \
+    --save_total_limit 2 \
+    --learning_rate 2e-4 \
+    --weight_decay 0. \
+    --warmup_ratio 0.03 \
+    --lr_scheduler_type "cosine" \
+    --logging_steps 1 \
+    --tf32 True \
+    --model_max_length 2048 \
+    --gradient_checkpointing True \
+    --dataloader_num_workers 8 \
+    --lazy_preprocess True \
+    --report_to tensorboard
