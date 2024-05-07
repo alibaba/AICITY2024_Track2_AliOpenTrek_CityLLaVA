@@ -181,8 +181,8 @@ def shortQA_merge():
 
 # Split short QA and long QA data, filter and sample for short QA
 def data_filter():
-    input_file = "./data/processed_anno/caption_split/caption_split_merge.json"
-    save_file = './data/processed_anno/llava_format/wts_bdd_llava_qa_train.json'
+    input_file = "./processed_anno/caption_split/caption_split_merge.json"
+    save_file = './processed_anno/llava_format/wts_bdd_llava_qa_train.json'
 
     result_single_question = []
     result_full_question = []
