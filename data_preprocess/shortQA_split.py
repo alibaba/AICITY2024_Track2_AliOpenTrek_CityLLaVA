@@ -111,11 +111,11 @@ if __name__ == '__main__':
     # test_caption = "The pedestrian is a male in his 10s, with a height of 160 cm. He is wearing a yellow T-shirt and black slacks. It is a weekday in an urban area with clear weather and dark brightness. The road surface is dry and level, made of asphalt. The pedestrian is standing diagonally to the left in front of a moving vehicle, which is far away. His body is perpendicular to the vehicle and to the right. His line of sight indicates that he is crossing the road. He is closely watching his destination while unaware of the vehicle. The pedestrian's speed is slow, and he intends to cross immediately in front of or behind the vehicle. The road he is on is a main road with one-way traffic and two lanes. Sidewalks are present on both sides"
     # classify_single_caption(test_caption, "pedestrian")
 
-    input_file = "./data/processed_anno/llava_format/wts_bdd_train.json"
-    save_file = "./data/processed_anno/caption_split/caption_split.json"
+    input_file = "./processed_anno/llava_format/wts_bdd_train.json"
+    save_file = "./processed_anno/caption_split/caption_split.json"
 
-    if not os.path.exists("./data/processed_anno/caption_split"):
-        os.makedirs("./data/processed_anno/caption_split")
+    if not os.path.exists("./processed_anno/caption_split"):
+        os.makedirs("./processed_anno/caption_split")
 
     num_works = 1
     endata_multiprocess = []
