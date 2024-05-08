@@ -72,6 +72,7 @@ Run the following script to process the train data:
 ```
 bash prepare_data_train.sh
 ```
+<b>Note</b> that the Openai or Qwen API is required in "prepare_data_train.sh". You should modify the API_KEY in this script.
 
 After the execution, the folder structure should be like this:
 

@@ -41,7 +41,10 @@ python generate_test_frames.py \
     --save-folder $save_folder
 
 # generate shortQA
-python shortQA_split.py
+API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+MODEL="Qwen"
+
+python shortQA_split.py --model $MODEL --api-key $API_KEY
 python shortQA_merge.py
 
 # data filter
