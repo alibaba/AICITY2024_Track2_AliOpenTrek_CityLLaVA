@@ -47,7 +47,7 @@ def infer(model_path, model_base, data_list, i, cache_dir, best_view_map, data_p
                 while retries < 5:
                     try:
                         global_image_path = os.path.join(data_path, scneario, clip)
-                        best_view = best_view_map[global_image_path]
+                        best_view = best_view_map[os.path.abspath(global_image_path)]
                         local_image_path = os.path.join(local_image_data_path, scneario, clip)
                         res_caption = infer_once(global_image_path, local_image_path, best_view, tokenizer, model, processor, context_len, model_name)
                         break

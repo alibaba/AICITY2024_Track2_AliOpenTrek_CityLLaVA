@@ -3,6 +3,10 @@ import json
 import tqdm
 import multiprocessing
 import os
+import argparse
+
+import dashscope
+from openai import OpenAI
 
 # Short QA Construction
 # 1) utilizes llm to categorize each sentence of the descriptions into predefined dimensions.
@@ -10,32 +14,47 @@ import os
 
 # * here we use qwen (dashscope api) instead of gpt-4 or chat-gpt, you can easily change it with openAI api
 # For prerequisites running the following sample, visit https://help.aliyun.com/document_detail/611472.html
-import dashscope
-dashscope.api_key = ""
-def call_with_messages(content):
-    messages = [{'role': 'system', 'content': 'You are a helpful assistant.'},
-                {'role': 'user', 'content': content
-                 }]
+def call_with_messages(content, model_type, key):
+    if model_type == 'Qwen':
+        dashscope.api_key = key
+        messages = [{'role': 'system', 'content': 'You are a helpful assistant.'},
+                    {'role': 'user', 'content': content
+                    }]
 
-    response = dashscope.Generation.call(
-        dashscope.Generation.Models.qwen_plus,
-        messages=messages,
-        result_format='message',  # set the result to be "message" format.
-    )
-    if response.status_code == HTTPStatus.OK:
-        # print(response)
-        response = response.output['choices'][0]['message']['content']
-        print(response)
+        response = dashscope.Generation.call(
+            dashscope.Generation.Models.qwen_plus,
+            messages=messages,
+            result_format='message',  # set the result to be "message" format.
+        )
+        if response.status_code == HTTPStatus.OK:
+            # print(response)
+            response = response.output['choices'][0]['message']['content']
+            print(response)
+            return response
+
+        else:
+            print('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
+                response.request_id, response.status_code,
+                response.code, response.message
+            ))
+            return None
+        
+    elif model_type == 'Openai':
+        client = OpenAI(api_key = key)
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": content,
+                }
+            ],
+            model="gpt-4",        
+        )
+        response = chat_completion.choices[0].message.content
         return response
 
-    else:
-        print('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
-            response.request_id, response.status_code,
-            response.code, response.message
-        ))
-        return None
 
-def classify_single_caption(caption_text, caption_type):
+def classify_single_caption(caption_text, caption_type, model_type, api_key):
     # 将长描述按照句号进行拆分
     caption_text += ' '
     caption_list = caption_text.split('. ')
@@ -80,10 +99,10 @@ def classify_single_caption(caption_text, caption_type):
                    "描述文本: \n" + new_caption_text)
 
     print(content)
-    response = call_with_messages(content)
+    response = call_with_messages(content, model_type, api_key)
     return response
 
-def classify_process(input_data_list, save_file, caption_type):
+def classify_process(input_data_list, save_file, caption_type, model_type, api_key):
     w = open(save_file, 'w', encoding='utf-8')
     for data in tqdm.tqdm(input_data_list):
         id = data['id']
@@ -94,11 +113,11 @@ def classify_process(input_data_list, save_file, caption_type):
 
             if caption_type == "vehicle":
                 # 描述拆分
-                response = classify_single_caption(vehicle_caption, "vehicle")
+                response = classify_single_caption(vehicle_caption, "vehicle", model_type, api_key)
                 data['vehicle_response'] = response
 
             else:
-                response = classify_single_caption(pedestrian_caption, "pedestrian")
+                response = classify_single_caption(pedestrian_caption, "pedestrian", model_type, api_key)
                 data['pedestrian_response'] = response
 
             w.write(json.dumps(data, ensure_ascii=False) + '\n')
@@ -107,15 +126,18 @@ def classify_process(input_data_list, save_file, caption_type):
             print('{}, {}'.format(id, e))
 
 if __name__ == '__main__':
-
     # test_caption = "The pedestrian is a male in his 10s, with a height of 160 cm. He is wearing a yellow T-shirt and black slacks. It is a weekday in an urban area with clear weather and dark brightness. The road surface is dry and level, made of asphalt. The pedestrian is standing diagonally to the left in front of a moving vehicle, which is far away. His body is perpendicular to the vehicle and to the right. His line of sight indicates that he is crossing the road. He is closely watching his destination while unaware of the vehicle. The pedestrian's speed is slow, and he intends to cross immediately in front of or behind the vehicle. The road he is on is a main road with one-way traffic and two lanes. Sidewalks are present on both sides"
     # classify_single_caption(test_caption, "pedestrian")
 
-    input_file = "./data/processed_anno/llava_format/wts_bdd_train.json"
-    save_file = "./data/processed_anno/caption_split/caption_split.json"
+    args = argparse.ArgumentParser()
+    args.add_argument('--model', type=str, default='Qwen', help='Choose your LLM')
+    args.add_argument('--api-key', type=str, required=True, help='Your API key for chosen LLM')
 
-    if not os.path.exists("./data/processed_anno/caption_split"):
-        os.makedirs("./data/processed_anno/caption_split")
+    input_file = "./processed_anno/llava_format/wts_bdd_train.json"
+    save_file = "./processed_anno/caption_split/caption_split.json"
+
+    if not os.path.exists("./processed_anno/caption_split"):
+        os.makedirs("./processed_anno/caption_split")
 
     num_works = 1
     endata_multiprocess = []
@@ -130,8 +152,8 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(processes=num_works)
     tasks = []
     for i in range(num_works):
-        tasks.append((endata_multiprocess[i], save_file.replace(".json", "_{}_{}.json".format("vehicle", i)), "vehicle"))
-        tasks.append((endata_multiprocess[i], save_file.replace(".json", "_{}_{}.json".format("pedestrian", i)), "pedestrian"))
+        tasks.append((endata_multiprocess[i], save_file.replace(".json", "_{}_{}.json".format("vehicle", i)), "vehicle", args.model, args.api_key))
+        tasks.append((endata_multiprocess[i], save_file.replace(".json", "_{}_{}.json".format("pedestrian", i)), "pedestrian", args.model, args.api_key))
     pool.starmap(classify_process, tasks)
     pool.close()
     pool.join()

@@ -1,5 +1,6 @@
 import json
 import os
+import cv2
 import shutil
 from tqdm import tqdm
 
@@ -81,9 +82,11 @@ def find_closest_number(target, arr):
             
     return closest_num
 
+no_bbox_frames_ones = set()
 for item in os.listdir(root):
     images = os.listdir(os.path.join(root, item))
     if len(images) == 0:
+        no_bbox_frames_ones.add(item)
         continue
     if len(images) != 5:
         for image in ['0.jpg', '1.jpg', '2.jpg', '3.jpg', '4.jpg']:
@@ -92,8 +95,76 @@ for item in os.listdir(root):
                 source_path = os.path.join(root, item, f'{closest_image}.jpg')
                 target_path = os.path.join(root, item, image)
                 shutil.copy(source_path, target_path)
+
                 perspective[os.path.abspath(target_path)] = perspective[os.path.abspath(source_path)]
+
+                source_path = os.path.join(root.replace('bbox_global', 'bbox_local'), item, f'{closest_image}.jpg')
+                target_path = os.path.join(root.replace('bbox_global', 'bbox_local'), item, image)
+                shutil.copy(source_path, target_path)
+
     assert len(os.listdir(os.path.join(root, item))) == 5
+
+
+def extract_frames(source_video, source_anno, save_folder):
+    with open(source_anno, 'r') as f:
+        data = json.load(f)
+    
+    cap = cv2.VideoCapture(source_video)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    for event in data['event_phase']:
+        label = event['labels'][0]
+        start_time = float(event['start_time'])
+
+        frame_number = int(start_time * fps)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
+
+        ret, frame = cap.read()
+        if ret:
+            cv2.imwrite(f'{save_folder}/{label}.jpg', frame)
+            cv2.imwrite(f'{save_folder.replace("bbox_global", "bbox_local")}/{label}.jpg', frame)
+        else:
+            print(f"Error: Unable to extract frame for event {label}, source video: {source_video}")
+
+    cap.release()
+
+for item in no_bbox_frames_ones:
+    if 'video' in item:
+        source_video = f'{args.bdd_test_folder.replace("bbox_global", "videos")}/{item}.mp4'
+        source_anno = f'{args.bdd_test_folder.replace("bbox_global", "annotations/caption")}_challenge/{item}_caption.json'
+        view = 'vehicle'
+    else:
+        best_view_video = best_view[item]
+        if 'normal' in best_view_video:
+            if 'vehicle' in best_view_video:
+                source_video = f'{args.wts_test_folder.replace("bbox_global", "videos")}/normal_trimmed/{item}/vehicle_view/{best_view_video}'
+                source_anno = f'{args.wts_test_folder.replace("bbox_global", "annotations/caption")}_challenge/normal_trimmed/{item}/vehicle_view/{item}_caption.json'
+                view = 'vehicle'
+            else:
+                source_video = f'{args.wts_test_folder.replace("bbox_global", "videos")}/normal_trimmed/{item}/overhead_view/{best_view_video}'
+                source_anno = f'{args.wts_test_folder.replace("bbox_global", "annotations/caption")}_challenge/normal_trimmed/{item}/overhead_view/{item}_caption.json'
+                view = 'overhead'
+        else:
+            if 'vehicle' in best_view_video:
+                source_video = f'{args.wts_test_folder.replace("bbox_global", "videos")}/{item}/vehicle_view/{best_view_video}'
+                source_anno = f'{args.wts_test_folder.replace("bbox_global", "annotations/caption")}_challenge/{item}/vehicle_view/{item}_caption.json'
+                view = 'vehicle'
+            else:
+                source_video = f'{args.wts_test_folder.replace("bbox_global", "videos")}/{item}/overhead_view/{best_view_video}'
+                source_anno = f'{args.wts_test_folder.replace("bbox_global", "annotations/caption")}_challenge/{item}/overhead_view/{item}_caption.json'
+                view = 'overhead'
+
+    save_folder = os.path.join(root, item)
+    extract_frames(source_video, source_anno, save_folder)
+    for image in ['0.jpg', '1.jpg', '2.jpg', '3.jpg', '4.jpg']:
+        target_path = os.path.abspath(os.path.join(root, item, image))
+        assert os.path.exists(target_path)
+        perspective[target_path] = view
+
+for item in os.listdir(root):
+    images = os.listdir(os.path.join(root, item))
+    if len(images) != 5:
+        print(item)
 
 with open(os.path.join(args.save_folder, 'perspective_test_images.json'), 'w') as f:
     f.write(json.dumps(perspective, indent=4))

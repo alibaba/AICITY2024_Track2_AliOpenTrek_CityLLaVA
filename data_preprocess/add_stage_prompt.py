@@ -17,8 +17,8 @@ def random_shuffle_conversations(conversations):
 
 
 if __name__ == '__main__':
-    labels_path = './data/processed_anno/llava_format/wts_bdd_llava_qa_train.json'
-    save_path = './data/processed_anno/llava_format/wts_bdd_llava_qa_train_stage.json'
+    labels_path = './processed_anno/llava_format/wts_bdd_llava_qa_train.json'
+    save_path = './processed_anno/llava_format/wts_bdd_llava_qa_train_stage.json'
 
 
     # wts_prompt = "<image>\nThis is an image in '{viewpoint}' stage. Pay attention to the pedestrian in the green bounding box and the vehicle in the blue bounding box. Note that the bounding box may not exist, then answer the following questions:\n{question}"

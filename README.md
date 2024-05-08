@@ -44,6 +44,44 @@ Please download the [wts-dataset](https://github.com/woven-visionai/wts-dataset)
 │   ├── BDD_PC_5k
 │   │   ├── annotations
 │   │   │   ├── bbox_annotated
+│   │   │   ├── bbox_generated
+│   │   │   └── caption
+│   │   └── videos
+│   ├── WTS
+│   │   ├── annotations
+│   │   │   ├── bbox_annotated
+│   │   │   ├── bbox_generated
+│   │   │   └── caption
+│   │   └── videos
+│   └── test_part
+|       ├── view_used_as_main_reference_for_multiview_scenario.csv
+│       ├── WTS_DATASET_PUBLIC_TEST
+│       └── WTS_DATASET_PUBLIC_TEST_BBOX
+└── ... # python and shell scripts
+```
+
+Then run the following script to process the test data:
+
+```
+bash prepare_data_test.sh
+```
+After this script is excuted, all the test data is prepared. You can download the fintuned model and run the inference step directly.
+
+Run the following script to process the train data:
+
+```
+bash prepare_data_train.sh
+```
+
+After the execution, the folder structure should be like this:
+
+```
+.
+├── data
+│   ├── BDD_PC_5k
+│   │   ├── annotations
+│   │   │   ├── bbox_annotated
+│   │   │   ├── bbox_generated
 │   │   │   └── caption
 │   │   ├── bbox_global # BDD global views
 │   │   │   ├── train
@@ -65,6 +103,7 @@ Please download the [wts-dataset](https://github.com/woven-visionai/wts-dataset)
 │   │   │   └── val
 │   │   └── videos
 │   └── test_part
+|       ├── view_used_as_main_reference_for_multiview_scenario.csv
 │       ├── WTS_DATASET_PUBLIC_TEST
 │       │   ├──bbox_global/test/public # WTS Test Images
 │       │   ├──bbox_local/test/public
@@ -88,12 +127,6 @@ Please download the [wts-dataset](https://github.com/woven-visionai/wts-dataset)
 └── ... # python and shell scripts
 ```
 
-Then run the following script to process the annotations:
-
-```
-bash prepare_data.sh
-```
-
 Then the processed annotations could be found under `./processed_anno`, and the train json is:
 
 ```
@@ -102,7 +135,7 @@ Then the processed annotations could be found under `./processed_anno`, and the 
 
 ## Block-Expansion
 
-    We use the[block expansion](https://github.com/TencentARC/LLaMA-Pro.git) to fine-tune the VLMs. 8~16 blocks are suggested for balancing the  performance and efficiency. We add 12 blcoks to the original llava-1.6-34b. the llava-1.6-34b-12block model could be created by these steps:
+We use the [block expansion](https://github.com/TencentARC/LLaMA-Pro.git) to fine-tune the VLMs. 8~16 blocks are suggested for balancing the  performance and efficiency. We add 12 blcoks to the original llava-1.6-34b. the llava-1.6-34b-12block model could be created by these steps:
 
 1. Download the [llava-1.6-34b](https://huggingface.co/liuhaotian/llava-v1.6-34b) model to `./models`, and add block with this script:
 
@@ -125,9 +158,7 @@ The fine-tuned model could be download [here](https://modelscope.cn/models/AliOp
 
 ## Inference
 
-Firstly, you should check the parameters defined at `./scripts/inference.sh`, ensure that all essential files exist.
-
-Note that should modify the path in Line 8 in `./llava/serve/batch_inference_block.py` (sys.path.append)
+Firstly, you should check the parameters defined at `./scripts/inference.sh`, ensure that all essential files and model exist.
 
 Now you can do inference on WTS_TEST_SET:
 
@@ -144,12 +175,14 @@ We use the [wts-dataset](https://github.com/woven-visionai/wts-dataset) for eval
 If you find CityLLaVA useful for your research and applications, please cite using this BibTeX:
 
 ```bibtex
-@article{duan2024cityllava,
+@misc{duan2024cityllava,
     title={CityLLaVA: Efficient Fine-Tuning for VLMs in City Scenario},
     url={https://github.com/qingchunlizhi/AICITY2024_Track2_AliOpenTrek_CityLLaVA},
     author={Zhizhao Duan, Hao Cheng, Duo Xu, Xi Wu, Xiangxie Zhang, Xi Ye, and Zhen Xie},
-    month={April},
-    year={2024}
+    year={2024},
+    eprint={2405.03194},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV}
 }
 ```
 

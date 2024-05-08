@@ -5,8 +5,8 @@ part = 'train'
 root_path = './data'
 reference_view_path = './data/test_part/view_used_as_main_reference_for_multiview_scenario.csv'
 
-data_path = './data/processed_anno/llava_format/wts_bdd_llava_qa_train_stage.json'
-save_path = './data/processed_anno/llava_format/wts_bdd_llava_qa_train_stage_filted.json'
+data_path = './processed_anno/llava_format/wts_bdd_llava_qa_train_stage.json'
+save_path = './processed_anno/llava_format/wts_bdd_llava_qa_train_stage_filted.json'
 
 area_thr = 1000
 stage_map = {'prerecognition': 0, 'recognition': 1, 'judgement': 2, 'action': 3, 'avoidance': 4}
