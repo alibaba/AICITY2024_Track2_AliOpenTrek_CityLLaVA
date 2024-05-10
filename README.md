@@ -1,6 +1,6 @@
 # AICITY2024_Track2_AliOpenTrek_CityLLaVA
 
-🏆 **The 1st Place** Solution to The 8th NVIDIA AI City Challenge (2024) Track 2: CityLLaVA: Efficient Fine-Tuning for VLMs in City Scenario.
+🏆 **The 1st Place** Solution to The 8th NVIDIA AI City Challenge (2024) Track 2: [CityLLaVA: Efficient Fine-Tuning for VLMs in City Scenario](https://arxiv.org/abs/2405.03194).
 
 ![1713757322703](image/README/1713757322703.png)
 
