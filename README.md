@@ -136,7 +136,7 @@ Then the processed annotations could be found under `./processed_anno`, and the 
 
 ## Block-Expansion
 
-We use the [block expansion](https://github.com/TencentARC/LLaMA-Pro.git) to fine-tune the VLMs. 8~16 blocks are suggested for balancing the  performance and efficiency. We add 12 blcoks to the original llava-1.6-34b. the llava-1.6-34b-12block model could be created by these steps:
+We use the block expansion to fine-tune the VLMs. 8~16 blocks are suggested for balancing the  performance and efficiency. We add 12 blcoks to the original llava-1.6-34b. the llava-1.6-34b-12block model could be created by these steps:
 
 1. Download the [llava-1.6-34b](https://huggingface.co/liuhaotian/llava-v1.6-34b) model to `./models`, and add block with this script:
 
